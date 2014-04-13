@@ -65,13 +65,16 @@ cacheSolve <- function(x, ...) {
 }
 
 ##
-## Unit tests for our above functions (ungraded)
+## TDD unit tests for our above functions (ungraded)
 ##
 
 cacheMatrixUnitTests <- function() {
     
+    printf <- function(...) { print(sprintf(...))}
+    warnings <- 0L
+    
     # Test the makeCacheMatrix API
-    source("cachematrix.R")
+    
     # Test 1: use default
     message("Test Set 1: object basics")
     message(" - 1a: create using default")
@@ -151,6 +154,27 @@ cacheMatrixUnitTests <- function() {
         stop("    [FAILED] - inverse matrix from cache did not match")
     }
     
-    message("DONE. All tests PASSED.")
+    # verify that the cache is working
+    message("Test Set 4: verify cache")
+    tm1 <- matrix(rnorm(1000*1000)*10, 1000)
+    cm <- makeCacheMatrix(tm1)
+    uncached <- sum(system.time(cacheSolve(cm)))
+    cached   <- sum(system.time(cacheSolve(cm)))
+    
+    if (cached >= uncached) {
+        message("    [WARNING]: cache may not be working; timings are off")
+        message(sprintf("               latency for uncached: %f, cached: %f",
+                        uncached, cached))
+        warnings <- warnings+1L
+    } else {
+        message(sprintf("    [PASSED] (latency: uncached %f, cached: %f)",
+                        uncached, cached))
+    }
+    
+    if (warnings > 0) {
+        message(sprintf("DONE. No errors, but %d warning(s) occurred.",
+                        warnings))
+    } else {
+        message("DONE. All tests PASSED.")
+    }
 }
-
